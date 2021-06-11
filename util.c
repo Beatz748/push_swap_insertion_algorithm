@@ -1,5 +1,14 @@
 #include "push_swap.h"
 
+t_stack			*get_last(t_stack *stack)
+{
+	if (!stack)
+		return (NULL);
+	while (stack->down)
+		stack = stack->down;
+	return (stack);
+}
+
 void		b_bzero(void *s, __uint64_b n)
 {
 	__uint64_b	i = 0;

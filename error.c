@@ -34,6 +34,11 @@ int			write_error(int ret)
 			b_stpncpy(buf + 18, " ARGUMENTS ARE BAD\n", 20);
 		else if ((ret == DUPLICATE_SYMBOLS) && (length += 20))
 			b_stpncpy(buf + 18, " DUPLICATE SYMBOLS\n", 20);
+		else if ((ret == NOT_ENOUGH_ELEMENTS) && (length += 22))
+			b_stpncpy(buf + 18, " NOT_ENOUGH_ELEMENTS\n", 22);
+		else if ((ret == ALREADY_SORTED) && (length += 17))
+			b_stpncpy(buf + 18, " ALREADY SORTED\n", 17);
+
 	}
 
 	if (write(STDERR_FILENO, buf, length) != length)

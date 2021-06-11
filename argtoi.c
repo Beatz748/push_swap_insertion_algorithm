@@ -7,28 +7,21 @@ void			b_print_stack(t_stack *stack)
 	i = -1;
 	while (stack)
 	{
-		printf("order -- %d : value : %lld \n", ++i, stack->value);
+		printf("order -- %d : value : %lld (local order = %lld)\n", ++i, stack->value, stack->order);
 		stack = stack->down;
 	}
 }
 
-// __int_b			add_command(t_commands **cmds, char *str)
-// {
-// 	if (*cmds == NULL)
-// 	{
-// 		if (!(*cmds = (t_stack *)malloc(sizeof(t_stack))))
-// 			return (ERROR_MALLOC);
-// 		b_bzero(*cmds, sizeof(t_stack));
-// 		(*cmds)->value = num;
-// 		return (SUCCESS);
-// 	}
-// 	while ((*cmds)->down)
-// 		(*cmds) = (*cmds)->down;
-// 	if (!((*scmds)->down->up = *stack;
-// 	(*cmds) = (*cmds)->down;
-// 	(*cmds)->command = num;
-// 	return (SUCCESS);
-// }
+__int_b			check_for_sorted(t_stack *stack)
+{
+	while (stack->down)
+	{
+		if (stack->value > stack->down->value)
+			return(SUCCESS);
+		stack = stack->down;
+	}
+	return (ALREADY_SORTED);
+}
 
 __int_b			add_number_to_stack(t_stack **stack, __int64_b num)
 {
@@ -41,11 +34,13 @@ __int_b			add_number_to_stack(t_stack **stack, __int64_b num)
 			return (ERROR_MALLOC);
 		b_bzero(*stack, sizeof(t_stack));
 		(*stack)->value = num;
+		(*stack)->order = -1;
+		(*stack)->chunk = -1;
 		return (SUCCESS);
 	}
 	while ((*stack)->down)
 	{
-		if ((*stack)->value == num)
+		if ((*stack)->value == num || (*stack)->down->value == num)
 			return (DUPLICATE_SYMBOLS);
 		(*stack) = (*stack)->down;
 	}
@@ -54,6 +49,9 @@ __int_b			add_number_to_stack(t_stack **stack, __int64_b num)
 	(*stack)->down->up = *stack;
 	(*stack) = (*stack)->down;
 	(*stack)->value = num;
+	(*stack)->order = -1;
+	(*stack)->chunk = -1;
+	(*stack)->down = 0x000;
 	*stack = tmp;
 	return (SUCCESS);
 }
@@ -61,7 +59,7 @@ __int_b			add_number_to_stack(t_stack **stack, __int64_b num)
 __int_b			argtoi(char **argv, t_base *base)
 {
 	__int64_b	num;
-	__int_b	flag;
+	__int_b		flag;
 
 	while (*argv)
 	{
