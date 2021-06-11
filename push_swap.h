@@ -1,6 +1,6 @@
 #ifndef PUSH_SWAP
 # define PUSH_SWAP
-# define CHUNKS 500
+# define CHUNKS 40
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

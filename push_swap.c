@@ -17,6 +17,17 @@ void print()
 	print_commands(*uk2);
 }
 
+__int_b			is_there_current_chunk(t_stack *stack, __int_b chunk)
+{
+	while (stack)
+	{
+		if (stack->chunk == chunk)
+			return (chunk);
+		stack = stack->down;
+	}
+	return (++chunk);
+}
+
 __int_b			print_all(t_base *base)
 {
 	t_stack		*A;
@@ -79,6 +90,20 @@ __int_b			push_to_top_a(t_stack **stack, __int_b current_chunk, t_commands **cmd
 	return (SUCCESS);
 }
 
+__int_b			is_all_sorted(t_stack *stack)
+{
+	t_stack		*tmp;
+
+	if (!stack || !stack->down)
+		return (0);
+	tmp = stack;
+	while (tmp->down && tmp->value > tmp->down->value)
+		tmp = tmp->down;
+	if (!tmp->down)
+		return (0);
+	return (1);
+}
+
 __int_b			is_sorted_chunk(t_stack *stack)
 {
 	__int_b		chunk;
@@ -121,7 +146,7 @@ __int_b			find_near_order(t_stack *stack, __int_b target)
 	chunk = stack->chunk;
 	ret = B_INT64_MIN;
 	safe = 1;
-	while (stack && stack->chunk == chunk)
+	while (stack)
 	{
 		if (stack->order > ret && stack->order < target)
 			ret = stack->order;
@@ -199,9 +224,6 @@ __int_b			make_sorted(t_stack *stack)
 	return (0);
 }
 
-
-// __int_b			make_sorted()
-
 __int_b			prepare_stack_b(t_base *base)
 {
 	__int_b		a;
@@ -213,18 +235,23 @@ __int_b			prepare_stack_b(t_base *base)
 	near = find_near_order(base->stack_b, base->stack_a->order);
 	if (all_low_or_high(base->stack_b, a))
 		while (base->stack_b->order != near)
+		{
 			paste_near(&base->stack_b, &base->cmds, near);
+		// print_all(base);
+		}
 	else
-		while (is_sorted_chunk(base->stack_b))
+		while (is_all_sorted(base->stack_b))
 		{
 			if (make_sorted(base->stack_b))
 				b_rb(&base->stack_b, &base->cmds);
 			else
 				b_rrb(&base->stack_b, &base->cmds);
+			// print_all(base);
 		}
 
 	return (SUCCESS);
 }
+
 
 __int_b			sorting(t_base *base)
 {
@@ -233,17 +260,24 @@ __int_b			sorting(t_base *base)
 	__int_b		current_chunk;
 
 	current_chunk = 0;
-	while (current_chunk < CHUNKS)
+	while (base->stack_a)
 	{
-		if (!base->stack_a)
-			break;
 		if ((ret = push_to_top_a(&base->stack_a, current_chunk, &base->cmds)))
 			return (FAIL);
 		prepare_stack_b(base);
 		b_pb(&base->stack_a, &base->stack_b, &base->cmds);
+		current_chunk = is_there_current_chunk(base->stack_a, current_chunk);
 		// print_all(base);
 	}
-	while (is_sorted_chunk(base->stack_b))
+		while (is_sorted_chunk(base->stack_b))
+		{
+			if (make_sorted(base->stack_b))
+				b_rb(&base->stack_b, &base->cmds);
+			else
+				b_rrb(&base->stack_b, &base->cmds);
+			print_all(base);
+		}
+	while (is_all_sorted(base->stack_b))
 			b_rb(&base->stack_b, &base->cmds);
 	__int_b	c = get_count_nums(base->stack_b);
 	while (c--)
